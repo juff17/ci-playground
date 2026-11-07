@@ -11,4 +11,4 @@ def divide(x, y):
 
 
 def mean(values):
-    return sum(values) / len(values)
+    return sum(values) / max(len(values), 1)
