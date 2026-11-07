@@ -1,0 +1,72 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  scenario:
+    runs-on: ubuntu-latest
+    outputs:
+      slow: ${{ steps.read.outputs.slow }}
+      slow_minutes: ${{ steps.read.outputs.slow_minutes }}
+      manual: ${{ steps.read.outputs.manual }}
+      stuck: ${{ steps.read.outputs.stuck }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: read
+        run: |
+          f=.ci/scenario
+          touch "$f"
+          for k in slow manual stuck; do
+            if grep -Eq "^[[:space:]]*$k([[:space:]]|$)" "$f"; then echo "$k=true"; else echo "$k=false"; fi
+          done >> "$GITHUB_OUTPUT"
+          m=$(grep -Eo '^[[:space:]]*slow[[:space:]]+[0-9]+' "$f" | grep -Eo '[0-9]+$' || true)
+          echo "slow_minutes=${m:-10}" >> "$GITHUB_OUTPUT"
+          cat "$GITHUB_OUTPUT"
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: make lint
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: make test
+
+  slow:
+    needs: scenario
+    if: needs.scenario.outputs.slow == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    env:
+      MINUTES: ${{ needs.scenario.outputs.slow_minutes }}
+    steps:
+      - run: |
+          for i in $(seq 1 "$MINUTES"); do
+            echo "minute $i of $MINUTES"
+            sleep 60
+          done
+
+  approval:
+    needs: scenario
+    if: needs.scenario.outputs.manual == 'true'
+    runs-on: ubuntu-latest
+    environment: approval
+    steps:
+      - run: echo "approved"
+
+  stuck:
+    needs: scenario
+    if: needs.scenario.outputs.stuck == 'true'
+    # No runner has this label, so the job stays queued until GitHub drops it.
+    runs-on: [self-hosted, ci-playground-no-such-runner]
+    steps:
+      - run: echo "unreachable"
