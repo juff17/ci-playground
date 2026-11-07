@@ -15,4 +15,4 @@ def mean(values):
 
 
 def subtract(a, b):
-    return b - a
+    return a - b
