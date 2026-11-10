@@ -26,7 +26,7 @@ def median(values):
 
 
 def mode(values):
-    """The most common value in values. Raises ValueError if an error occured, as for an empty list."""
+    """The most common value in values. Raises ValueError if an error occurred, as for an empty list."""
     if not values:
         raise ValueError("mode of an empty list")
     counts = {}
