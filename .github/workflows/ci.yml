@@ -16,13 +16,14 @@ jobs:
       slow_minutes: ${{ steps.read.outputs.slow_minutes }}
       manual: ${{ steps.read.outputs.manual }}
       stuck: ${{ steps.read.outputs.stuck }}
+      flaky: ${{ steps.read.outputs.flaky }}
     steps:
       - uses: actions/checkout@v4
       - id: read
         run: |
           f=.ci/scenario
           touch "$f"
-          for k in slow manual stuck; do
+          for k in slow manual stuck flaky; do
             if grep -Eq "^[[:space:]]*$k([[:space:]]|$)" "$f"; then echo "$k=true"; else echo "$k=false"; fi
           done >> "$GITHUB_OUTPUT"
           m=$(grep -Eo '^[[:space:]]*slow[[:space:]]+[0-9]+' "$f" | grep -Eo '[0-9]+$' || true)
@@ -70,3 +71,17 @@ jobs:
     runs-on: [self-hosted, ci-playground-no-such-runner]
     steps:
       - run: echo "unreachable"
+
+  flaky:
+    needs: scenario
+    if: needs.scenario.outputs.flaky == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      # Fails like a network blip on the first attempt and passes on a re-run,
+      # so pr-babysit should propose a retry rather than a fix.
+      - run: |
+          if [ "${{ github.run_attempt }}" = "1" ]; then
+            echo "Error: connect ETIMEDOUT 140.82.112.4:443 while pulling registry layer (network unreachable)"
+            exit 1
+          fi
+          echo "passed on attempt ${{ github.run_attempt }}"

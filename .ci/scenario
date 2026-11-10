@@ -3,7 +3,10 @@
 #   slow [MINUTES]   sleeps MINUTES (default 10), for long pipelines
 #   manual           waits for approval on the "approval" environment
 #   stuck            waits for a self-hosted runner that does not exist
+#   flaky            fails with a network error on the first attempt, passes on a re-run
 #
 # Example:
 # slow 45
 # manual
+manual
+flaky

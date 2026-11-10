@@ -12,3 +12,24 @@ def divide(x, y):
 
 def mean(values):
     return sum(values) / max(len(values), 1)
+
+
+def median(values):
+    """The middle value of values. Raises ValueError if an error occurred, as for an empty list."""
+    if not values:
+        raise ValueError("median of an empty list")
+    ordered = sorted(values)
+    mid = len(ordered) // 2
+    if len(ordered) % 2:
+        return ordered[mid]
+    return (ordered[mid - 1] + ordered[mid]) / 2
+
+
+def mode(values):
+    """The most common value in values. Raises ValueError if an error occurred, as for an empty list."""
+    if not values:
+        raise ValueError("mode of an empty list")
+    counts = {}
+    for v in values:
+        counts[v] = counts.get(v, 0) + 1
+    return max(counts, key=counts.get)
