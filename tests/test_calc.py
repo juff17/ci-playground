@@ -1,6 +1,6 @@
 import unittest
 
-from calc import add, divide, mean, median
+from calc import add, divide, mean, median, mode
 
 
 class CalcTest(unittest.TestCase):
@@ -22,6 +22,11 @@ class CalcTest(unittest.TestCase):
         self.assertEqual(median([4, 1, 3, 2]), 2.5)
         with self.assertRaises(ValueError):
             median([])
+
+    def test_mode(self):
+        self.assertEqual(mode([1, 2, 2, 3]), 2)
+        with self.assertRaises(ValueError):
+            mode([])
 
 
 if __name__ == "__main__":
