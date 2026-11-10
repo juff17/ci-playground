@@ -15,7 +15,7 @@ def mean(values):
 
 
 def median(values):
-    """The middle value of values. Raises ValueError if an error occured, as for an empty list."""
+    """The middle value of values. Raises ValueError if an error occurred, as for an empty list."""
     if not values:
         raise ValueError("median of an empty list")
     ordered = sorted(values)
