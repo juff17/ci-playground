@@ -18,6 +18,7 @@ on extra jobs for that commit:
 | `slow 45` | Sleeps 45 minutes | none until it finishes, then `[pipeline]` |
 | `manual` | Waits for approval on the `approval` environment | `[manual]` |
 | `stuck` | Waits for a self-hosted runner that does not exist | `[stuck]` (run with `--stuck-after 2`) |
+| `flaky` | Fails with a network error on its first attempt, passes on a re-run | `[failed]`, then a proposed retry |
 
 Other events:
 
