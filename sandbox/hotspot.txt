@@ -7,7 +7,7 @@ slot-05: free
 slot-06: free
 slot-07: free
 slot-08: free
-slot-09: free
+slot-09: claimed by scn/conflict-s09-omib2zh
 slot-10: free
 slot-11: free
 slot-12: free
