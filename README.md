@@ -36,18 +36,18 @@ Why `main` stays green:
 - `bin/scenario --help`: scenario tooling (needs `gh` signed in)
 
 Run `bin/scenario setup` once to create the environments: `staging` (no
-gate), and `approval` and `production`, which wait for you.
+gate), and `preview` and `production`, which wait for you.
 
 ## Pipelines
 
 **CI** (`ci.yml`) runs on every PR. Jobs are named `<stage> / <job>`, so
 the monitors show three stages: `setup / scenario`, then `check / lint` and
-`check / test`, then any `extra / *` job a switch turns on.
+`check / test`, then any `extra / *` or `preview / *` job a switch turns on.
 
 | Switch | Job | Expected event |
 |--------|-----|----------------|
 | `slow 45` | `extra / slow` sleeps 45 minutes | none until it finishes, then `[pipeline]` |
-| `manual` | `extra / approval` waits on the `approval` environment | `[manual]` |
+| `manual` | `preview / deploy-preview` waits on the `preview` environment | `[manual]` |
 | `stuck` | `extra / stuck` waits for a self-hosted runner that does not exist | `[stuck]` (watch with `--stuck-after 2`) |
 | `flaky` | `extra / flaky` fails with a network error on its first attempt, passes on a re-run | `[failed]`, then a proposed retry |
 
@@ -67,7 +67,7 @@ each at once, for testing many monitors side by side.
 | `happy` | adds a helper and its passing test | stage lines, `[pipeline]` passed, `[merged]` after `bin/scenario merge N` |
 | `failing` | adds a helper with an off-by-one bug its test catches | `[failed]` on `check / test`, then commit a fix |
 | `flaky` | `happy` plus the `flaky` switch | `[failed]` on `extra / flaky`, then propose a retry |
-| `manual` | `happy` plus the `manual` switch | `[manual]` on `extra / approval` |
+| `manual` | `happy` plus the `manual` switch | `[manual]` on `preview / deploy-preview` |
 | `slow` | `happy` plus `slow N` (`--minutes N`) | quiet until `[pipeline]` |
 | `stuck` | `happy` plus the `stuck` switch | `[stuck]` |
 | `behind` | `happy`; then `bin/scenario advance` moves main | `[behind]`, then a clean rebase |

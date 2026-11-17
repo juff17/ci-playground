@@ -136,13 +136,13 @@ KINDS = {
     "happy": ("ok", [], "stage lines, then [pipeline] passed. Merge it (bin/scenario merge N) for [merged]"),
     "failing": ("bug", [], "[failed] check / test. The agent should commit a fix to last_n"),
     "flaky": ("ok", ["flaky"], "[failed] extra / flaky, then a proposed retry that passes"),
-    "manual": ("ok", ["manual"], "[manual] extra / approval waits on the approval environment"),
+    "manual": ("ok", ["manual"], "[manual] preview / deploy-preview waits on the preview environment"),
     "slow": ("ok", ["slow {minutes}"], "nothing until [pipeline] after the slow job's minutes"),
     "stuck": ("ok", ["stuck"], "[stuck] extra / stuck (watch with --stuck-after 2)"),
     "behind": ("ok", [], "[behind] once main moves (bin/scenario advance). The agent rebases with no conflicts"),
     "conflict": ("ok", [], "[conflict] once main edits its slot (bin/scenario collide N). The agent resolves sandbox/hotspot.txt"),
     "comments": ("review", [], "[comment] and [review] once the bot posts (bin/scenario review N)"),
-    "messy": ("bug", ["flaky", "manual"], "[failed] check / test and extra / flaky, and [manual] extra / approval"),
+    "messy": ("bug", ["flaky", "manual"], "[failed] check / test and extra / flaky, and [manual] preview / deploy-preview"),
 }
 
 FLEET = ["happy", "failing", "flaky", "manual", "behind", "conflict", "comments", "messy"]
@@ -521,9 +521,9 @@ def cmd_cleanup(args):
 def cmd_setup(args):
     uid = json.loads(sh("gh", "api", "user"))["id"]
     api("environments/staging", "PUT", {})
-    api("environments/approval", "PUT", {"reviewers": [{"type": "User", "id": uid}], "prevent_self_review": False})
+    api("environments/preview", "PUT", {"reviewers": [{"type": "User", "id": uid}], "prevent_self_review": False})
     api("environments/production", "PUT", {"reviewers": [{"type": "User", "id": uid}], "prevent_self_review": False})
-    print("environments ready: staging (no gate), approval and production (wait for you)")
+    print("environments ready: staging (no gate), preview and production (wait for you)")
 
 
 # ------------------------------------------------------------ main
@@ -585,7 +585,7 @@ def parser():
     quiet(s)
     s.set_defaults(fn=cmd_cleanup)
 
-    s = sub.add_parser("setup", help="create the staging, approval and production environments")
+    s = sub.add_parser("setup", help="create the staging, preview and production environments")
     s.set_defaults(fn=cmd_setup)
     return p
 
