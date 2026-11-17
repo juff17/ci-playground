@@ -7,7 +7,7 @@ slot-05: free
 slot-06: free
 slot-07: free
 slot-08: free
-slot-09: free
+slot-09: taken on main by bump/omij4eg
 slot-10: free
 slot-11: free
 slot-12: free
