@@ -3,4 +3,4 @@
 
 def last_n(values, n):
     """The last n items of values."""
-    return values[-n - 1:]
+    return values[-n:] if n > 0 else []
