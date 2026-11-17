@@ -6,7 +6,7 @@ Each keyword on its own line:
 
 ```
 slow 45   # sleeps 45 minutes (default 10)
-manual    # waits for approval on the "approval" environment
+manual    # deploys a preview that waits on the "preview" environment
 stuck     # waits for a self-hosted runner that does not exist
 flaky     # fails with a network error on the first attempt, passes on a re-run
 ```

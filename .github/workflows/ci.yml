@@ -1,7 +1,8 @@
 name: CI
 
 # Runs on every PR. Jobs are named "<stage> / <job>" so the monitors group
-# them into stages: setup, then check, then the extra jobs a scenario turns on.
+# them into stages: setup, then check, then the extra and preview jobs a scenario
+# turns on.
 # Main has its own pipeline, release.yml.
 
 on:
@@ -69,14 +70,14 @@ jobs:
             sleep 60
           done
 
-  approval:
-    name: extra / approval
+  deploy-preview:
+    name: preview / deploy-preview
     needs: scenario
     if: needs.scenario.outputs.manual == 'true'
     runs-on: ubuntu-latest
-    environment: approval
+    environment: preview
     steps:
-      - run: echo "approved"
+      - run: echo "deployed preview for PR ${{ github.event.pull_request.number }}"
 
   stuck:
     name: extra / stuck
