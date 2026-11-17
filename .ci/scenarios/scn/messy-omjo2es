@@ -1,0 +1,3 @@
+# Switches for the CI runs of scn/messy-omjo2es. See README.md, CI scenarios.
+flaky
+manual
