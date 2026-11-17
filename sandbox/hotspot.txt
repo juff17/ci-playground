@@ -1,6 +1,6 @@
 # Conflict scenarios claim one slot each and rewrite its line. Keep one line per slot.
 slot-01: free
-slot-02: free
+slot-02: claimed by scn/conflict-s02-omjnulz
 slot-03: free
 slot-04: free
 slot-05: free
