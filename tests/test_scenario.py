@@ -44,8 +44,10 @@ class SlotsTest(unittest.TestCase):
         self.assertEqual(scenario.slots(text)[7], "claimed by scn/x")
         self.assertEqual(sum(v == "free" for v in scenario.slots(text).values()), scenario.SLOTS - 1)
 
-    def test_fresh_hotspot_matches_the_file(self):
-        self.assertEqual((scenario.ROOT / scenario.HOTSPOT).read_text(), scenario.fresh_hotspot())
+    def test_fresh_hotspot_has_the_file_slots(self):
+        # Scenarios rewrite slots on main, so only the slot numbers must match.
+        on_disk = scenario.slots((scenario.ROOT / scenario.HOTSPOT).read_text())
+        self.assertEqual(on_disk.keys(), scenario.slots(scenario.fresh_hotspot()).keys())
 
     def test_slot_of_branch(self):
         self.assertEqual(scenario.slot_of("scn/conflict-s07-k3x9ab"), 7)
