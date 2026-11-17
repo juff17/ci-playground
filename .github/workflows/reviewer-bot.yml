@@ -22,6 +22,12 @@ on:
           - injection
           - request-changes
           - approve
+          - variety
+          - tiny
+          - code
+          - suggestion
+          - link
+          - long
 
 permissions:
   contents: read

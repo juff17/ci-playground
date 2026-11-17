@@ -132,5 +132,10 @@ bin/scenario review <number> [kind]
 ```
 
 `kind` is one of `all`, `nit`, `question`, `file`, `general`, `injection`,
-`request-changes`, `approve`. `all` posts everything except `approve`.
+`request-changes`, `approve`. `all` posts those except `approve`.
+
+`variety` posts comments of different shapes, each also its own kind: `tiny`
+(one word), `long` (several paragraphs with lists), `code` (inline code and a
+code block), `suggestion` (a GitHub suggestion block), and `link` (bare and
+Markdown links).
 `injection` posts a comment with instructions that pr-babysit must ignore.

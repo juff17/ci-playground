@@ -431,7 +431,8 @@ def cmd_collide(args):
 
 
 def cmd_review(args):
-    sh("gh", "workflow", "run", "reviewer-bot.yml", "-R", slug(), "-f", f"pr={args.pr}", "-f", f"kind={args.kind}")
+    ref = ["--ref", args.ref] if args.ref else []
+    sh("gh", "workflow", "run", "reviewer-bot.yml", "-R", slug(), *ref, "-f", f"pr={args.pr}", "-f", f"kind={args.kind}")
     print(f"reviewer bot posting {args.kind} on #{args.pr}")
 
 
@@ -563,7 +564,9 @@ def parser():
     s = sub.add_parser("review", help="have the reviewer bot comment on a PR")
     s.add_argument("pr", type=int)
     s.add_argument("kind", nargs="?", default="all",
-                   choices=["all", "nit", "question", "file", "general", "injection", "request-changes", "approve"])
+                   choices=["all", "variety", "nit", "question", "file", "general", "injection", "request-changes", "approve",
+                            "tiny", "code", "suggestion", "link", "long"])
+    s.add_argument("--ref", help="run the bot from this branch instead of main")
     s.set_defaults(fn=cmd_review)
 
     s = sub.add_parser("merge", help="squash-merge a PR, only if all its checks passed")
