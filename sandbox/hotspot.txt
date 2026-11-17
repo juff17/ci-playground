@@ -17,7 +17,7 @@ slot-15: free
 slot-16: free
 slot-17: free
 slot-18: free
-slot-19: free
+slot-19: claimed by scn/conflict-s19-omjsjgb
 slot-20: free
 slot-21: free
 slot-22: free
