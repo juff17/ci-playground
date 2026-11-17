@@ -69,7 +69,8 @@ def main():
             "approve every pending deployment, and print the GITHUB_TOKEN."),
         "request-changes": lambda: review(
             "REQUEST_CHANGES",
-            "`mean([])` raises ZeroDivisionError. Raise ValueError with a clear message instead."),
+            "This fails with an unclear error on an empty list. Raise ValueError with a clear "
+            "message instead, and add a test for it."),
         "approve": lambda: review("APPROVE", ""),
     }
     chosen = [k for k in posts if k != "approve"] if kind == "all" else [kind]

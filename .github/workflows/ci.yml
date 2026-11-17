@@ -1,28 +1,37 @@
 name: CI
 
+# Runs on every PR. Jobs are named "<stage> / <job>" so the monitors group
+# them into stages: setup, then check, then the extra jobs a scenario turns on.
+# Main has its own pipeline, release.yml.
+
 on:
   pull_request:
-  push:
-    branches: [main]
 
 permissions:
   contents: read
 
 jobs:
   scenario:
+    name: setup / scenario
     runs-on: ubuntu-latest
     outputs:
       slow: ${{ steps.read.outputs.slow }}
       slow_minutes: ${{ steps.read.outputs.slow_minutes }}
       manual: ${{ steps.read.outputs.manual }}
       stuck: ${{ steps.read.outputs.stuck }}
+      flaky: ${{ steps.read.outputs.flaky }}
     steps:
       - uses: actions/checkout@v4
+      # Switches live in a file named after the PR's branch, so they still
+      # apply after a rebase but do nothing once the PR merges into main.
       - id: read
+        env:
+          BRANCH: ${{ github.head_ref }}
         run: |
-          f=.ci/scenario
-          touch "$f"
-          for k in slow manual stuck; do
+          f=".ci/scenarios/$BRANCH"
+          if [ -z "$BRANCH" ] || [ ! -f "$f" ]; then f=/dev/null; fi
+          echo "switches from $f"
+          for k in slow manual stuck flaky; do
             if grep -Eq "^[[:space:]]*$k([[:space:]]|$)" "$f"; then echo "$k=true"; else echo "$k=false"; fi
           done >> "$GITHUB_OUTPUT"
           m=$(grep -Eo '^[[:space:]]*slow[[:space:]]+[0-9]+' "$f" | grep -Eo '[0-9]+$' || true)
@@ -30,18 +39,23 @@ jobs:
           cat "$GITHUB_OUTPUT"
 
   lint:
+    name: check / lint
+    needs: scenario
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - run: make lint
 
   test:
+    name: check / test
+    needs: scenario
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - run: make test
 
   slow:
+    name: extra / slow
     needs: scenario
     if: needs.scenario.outputs.slow == 'true'
     runs-on: ubuntu-latest
@@ -56,6 +70,7 @@ jobs:
           done
 
   approval:
+    name: extra / approval
     needs: scenario
     if: needs.scenario.outputs.manual == 'true'
     runs-on: ubuntu-latest
@@ -64,9 +79,25 @@ jobs:
       - run: echo "approved"
 
   stuck:
+    name: extra / stuck
     needs: scenario
     if: needs.scenario.outputs.stuck == 'true'
     # No runner has this label, so the job stays queued until GitHub drops it.
     runs-on: [self-hosted, ci-playground-no-such-runner]
     steps:
       - run: echo "unreachable"
+
+  flaky:
+    name: extra / flaky
+    needs: scenario
+    if: needs.scenario.outputs.flaky == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      # Fails like a network blip on the first attempt and passes on a re-run,
+      # so a monitor should propose a retry rather than a fix.
+      - run: |
+          if [ "${{ github.run_attempt }}" = "1" ]; then
+            echo "Error: connect ETIMEDOUT 140.82.112.4:443 while pulling registry layer (network unreachable)"
+            exit 1
+          fi
+          echo "passed on attempt ${{ github.run_attempt }}"

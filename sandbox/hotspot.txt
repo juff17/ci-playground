@@ -1,0 +1,25 @@
+# Conflict scenarios claim one slot each and rewrite its line. Keep one line per slot.
+slot-01: free
+slot-02: free
+slot-03: free
+slot-04: free
+slot-05: free
+slot-06: free
+slot-07: free
+slot-08: free
+slot-09: free
+slot-10: free
+slot-11: free
+slot-12: free
+slot-13: free
+slot-14: free
+slot-15: free
+slot-16: free
+slot-17: free
+slot-18: free
+slot-19: free
+slot-20: free
+slot-21: free
+slot-22: free
+slot-23: free
+slot-24: free

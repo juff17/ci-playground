@@ -1,0 +1,91 @@
+name: Release
+
+# Main's pipeline: build, test, deploy to staging, then wait for approval on
+# the protected "production" environment. The deploys only print; nothing is
+# shipped anywhere.
+#
+# Every push to main runs it gated. Run it by hand (bin/scenario pipeline ...)
+# to make a run that fails, flakes, drags, or skips the gate, without changing
+# main's code.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      gate:
+        description: Wait for approval before the production deploy
+        type: boolean
+        default: true
+      fail_at:
+        description: Job that fails on purpose
+        type: choice
+        default: none
+        options: [none, build, test, staging, production]
+      flaky_at:
+        description: Job that fails on its first attempt and passes on a re-run
+        type: choice
+        default: none
+        options: [none, build, test, staging, production]
+      slow_minutes:
+        description: Minutes the staging deploy takes
+        default: "0"
+
+permissions:
+  contents: read
+
+env:
+  FAIL_AT: ${{ inputs.fail_at }}
+  FLAKY_AT: ${{ inputs.flaky_at }}
+
+jobs:
+  build:
+    name: build / package
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: .github/scripts/release_step.sh build
+      - run: make lint
+
+  test:
+    name: test / unit
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: .github/scripts/release_step.sh test
+      - run: make test
+
+  staging:
+    name: deploy / staging
+    needs: test
+    runs-on: ubuntu-latest
+    environment: staging
+    env:
+      MINUTES: ${{ inputs.slow_minutes || '0' }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: .github/scripts/release_step.sh staging
+      - run: |
+          for i in $(seq 1 "$MINUTES"); do
+            echo "rolling out, minute $i of $MINUTES"
+            sleep 60
+          done
+          echo "deployed ${GITHUB_SHA::7} to staging"
+
+  production:
+    name: deploy / production
+    needs: staging
+    runs-on: ubuntu-latest
+    # Gated unless a hand-run turned the gate off. An empty name means no
+    # environment, so the job runs without waiting.
+    environment: ${{ (github.event_name != 'workflow_dispatch' || inputs.gate) && 'production' || '' }}
+    # One production deploy at a time. A newer run waits behind the one at the
+    # gate, and a newer one still replaces it, as a real release queue does.
+    concurrency:
+      group: production
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+      - run: .github/scripts/release_step.sh production
+      - run: echo "deployed ${GITHUB_SHA::7} to production"
